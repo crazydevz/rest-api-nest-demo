@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
-import { IsNotEmpty, Length } from 'class-validator'
+import { IsEmail, IsNotEmpty, IsString, Length } from 'class-validator'
+import { Role } from '../enums'
 
 @Schema({
 	timestamps: true,
@@ -8,6 +9,7 @@ import { IsNotEmpty, Length } from 'class-validator'
 			ret.id = ret._id
 			delete ret._id
 			delete ret.__v
+			delete ret.password
 			return ret
 		},
 	},
@@ -16,24 +18,35 @@ import { IsNotEmpty, Length } from 'class-validator'
 			ret.id = ret._id
 			delete ret._id
 			delete ret.__v
+			delete ret.password
 			return ret
 		},
 	},
 })
-export class Product {
-	@Prop({ unique: true })
+export class User {
+	@Prop()
 	@IsNotEmpty()
 	@Length(3, 25)
 	name: string
 
+	@Prop({ unique: true })
+	@IsNotEmpty()
+	@IsEmail()
+	email: string
+
 	@Prop()
 	@IsNotEmpty()
 	@Length(3, 25)
-	brand: string
+	password: string
 
-	@Prop()
+	@Prop({
+		default: [Role.User],
+		type: Array,
+		lowercase: true,
+		enum: Role,
+	})
 	@IsNotEmpty()
-	price: number
+	roles: Role[]
 }
 
-export const ProductSchema = SchemaFactory.createForClass(Product)
+export const UserSchema = SchemaFactory.createForClass(User)
